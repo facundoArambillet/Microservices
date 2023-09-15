@@ -82,7 +82,8 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    //Metodos de FallBacks
+    //Metodos de FallBacks que me sirve para devolver algo cuando alguno de los servicios que uso esta caido
+    //Esto me permite que se me rompa la aplicacion si se cae alguno
 
     private ResponseEntity<List<Car>> fallbackGetCars(@PathVariable("idUser") int idUser, RuntimeException e) {
         return new ResponseEntity("El usuario " + idUser + " tiene los autos en el mecanico", HttpStatus.OK);
@@ -93,10 +94,10 @@ public class UserController {
     private ResponseEntity<Car> fallbackSaveCar(@PathVariable("idUser") int idUser, @RequestBody Car car, RuntimeException e) {
         return new ResponseEntity("El usuario " + idUser + " no tiene dinero para autos", HttpStatus.OK);
     }
-    private ResponseEntity<Bike> fallbackSaveBikes(@PathVariable("idUser") int idUser, @RequestBody Bike bike, RuntimeException e) {
+    private ResponseEntity<Bike> fallbackSaveBike(@PathVariable("idUser") int idUser, @RequestBody Bike bike, RuntimeException e) {
         return new ResponseEntity("El usuario " + idUser + " no tiene dinero para motos", HttpStatus.OK);
     }
-    private ResponseEntity<Map<String,Object>> getAllVehicles(@PathVariable("idUser") int idUser, RuntimeException e) {
+    private ResponseEntity<Map<String,Object>> fallbackGetAll(@PathVariable("idUser") int idUser, RuntimeException e) {
         return new ResponseEntity("El usuario " + idUser + " tiene los vehiculos en el taller", HttpStatus.OK);
     }
 }
