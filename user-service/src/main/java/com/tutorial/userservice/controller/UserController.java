@@ -83,7 +83,7 @@ public class UserController {
     }
 
     //Metodos de FallBacks que me sirve para devolver algo cuando alguno de los servicios que uso esta caido
-    //Esto me permite que se me rompa la aplicacion si se cae alguno
+    //Esto me permite que no se me rompa la aplicacion si se cae alguno
 
     private ResponseEntity<List<Car>> fallbackGetCars(@PathVariable("idUser") int idUser, RuntimeException e) {
         return new ResponseEntity("El usuario " + idUser + " tiene los autos en el mecanico", HttpStatus.OK);

@@ -10,7 +10,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -20,12 +23,30 @@ public class AuthService {
     AuthUserRepository authUserRepository;
     @Autowired
     JwtProvider jwtProvider;
+    @Autowired
+    PasswordEncoder passwordEncoder;
     public TokenDto login(AuthUser authUser) {
-        Authentication authentication =
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authUser.getUserName(),
-                        authUser.getUserPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = jwtProvider.createToken(authUser);
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                new UsernamePasswordAuthenticationToken(authUser.getUserName(), authUser.getUserPassword());
+        Authentication authentication = this.authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+        UserDetailsImpl userToken = (UserDetailsImpl) authentication.getPrincipal();
+        String token = jwtProvider.createToken(userToken);
         return new TokenDto(token);
+    }
+
+    public String register(AuthUser authUser) {
+        Optional<AuthUser> user = authUserRepository.findByUserName(authUser.getUserName());
+        if(!user.isPresent()) {
+            authUser.setUserPassword(passwordEncoder.encode(authUser.getUserPassword()));
+            authUserRepository.save(authUser);
+            return "User added";
+        }
+        return "The user exist";
+    }
+
+    public Optional<AuthUser> getUserById(int idUser) {
+        Optional<AuthUser> user = authUserRepository.findById(idUser);
+        return user;
     }
 }

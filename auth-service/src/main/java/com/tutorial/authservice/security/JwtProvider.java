@@ -7,6 +7,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.tutorial.authservice.dto.AuthUserDto;
 import com.tutorial.authservice.model.AuthUser;
 
+import com.tutorial.authservice.service.UserDetailsImpl;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtProvider {
@@ -24,32 +27,10 @@ public class JwtProvider {
     @Value("${jwt.secret}")
     private String secret;
 
-    @PostConstruct
-    protected void init() {
-        secret = Base64.getEncoder().encodeToString(secret.getBytes());
-    }
-
-//    public String createToken(AuthUser authUser) {
-//        Map<String,Object> claims = new HashMap<>();
-//        claims = Jwts.claims().setSubject(authUser.getUserName());
-//        claims.put("id", authUser.getIdUser());
-//        Date now = new Date();
-//        Date exp = new Date(now.getTime() + 3600000);
-//
-//        return Jwts.builder()
-//                .setClaims(claims)
-//                .setIssuedAt(now)
-//                .setExpiration(exp)
-//                .signWith(SignatureAlgorithm.HS256, secret)
-//                .compact();
-//    }
-
-    public String createToken(AuthUser authUser){
+    public String createToken(UserDetailsImpl authUser){
         try {
             return JWT.create()
-                    .withSubject(authUser.getUserName())
-                    .withClaim("id", authUser.getIdUser())
-                    .withClaim("rol",authUser.getRol())
+                    .withSubject(authUser.getUsername())
                     .withIssuedAt(new Date())
                     .withExpiresAt(Date.from(LocalDateTime.now()
                             .plusHours(24)
@@ -70,11 +51,11 @@ public class JwtProvider {
             DecodedJWT jwt = JWT.require(Algorithm.HMAC256(secret))
                     .build()
                     .verify(token);
-            logger.info("Token válido");
+            System.out.println("Token válido");
             return  true;
         } catch (JWTVerificationException e) {
             // El token no es válido
-            logger.error("Token no válido: " + e.getMessage());
+            System.out.println("Token no válido: " + e.getMessage());
             return false;
         }
     }

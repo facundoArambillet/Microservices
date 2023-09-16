@@ -1,49 +1,55 @@
 package com.example.gatewayservice.config;
 
-import com.example.gatewayservice.dto.TokenDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
 @Component
 public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> {
-    private WebClient.Builder webClientBuilder;
+
+    @Autowired
+    private RouteValidator routeValidator;
+
+//    @Autowired
+//    private RestTemplate restTemplate;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
     public AuthFilter(WebClient.Builder webClientBuilder) {
         super(Config.class);
-        this.webClientBuilder = webClientBuilder;
     }
 
     @Override
     public GatewayFilter apply(Config config) {
-        return (((exchange, chain) -> {
-            if(!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION))
-                return onError(exchange, HttpStatus.BAD_REQUEST);
-            String tokenHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
-            String [] chunks = tokenHeader.split(" ");
-            if(chunks.length != 2 || !chunks[0].equals("Bearer"))
-                return onError(exchange, HttpStatus.BAD_REQUEST);
-            return webClientBuilder.build()
-                    .post()
-                    .uri("http://auth-service/auth/login?token=" + chunks[1])
-                    .retrieve().bodyToMono(TokenDto.class)
-                    .map(t -> {
-                        t.getToken();
-                        return exchange;
-                    }).flatMap(chain::filter);
+        return(((exchange, chain) -> {
+        if(routeValidator.isSecured.test(exchange.getRequest())) {
+            //header contains token or not
+            if(!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
+                throw new RuntimeException("Missing authorization header");
+            }
+            String authHeaders = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
+            if(authHeaders != null && authHeaders.startsWith("Bearer ")) {
+                authHeaders = authHeaders.substring(7);
+                System.out.println(authHeaders);
+            }
+            try {
+                if(!jwtUtil.validateToken(authHeaders)) {
+                     throw new RuntimeException("");
+                }
+
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new RuntimeException("Unauthorized access to application");
+            }
+        }
+            return chain.filter(exchange);
         }));
     }
 
-
-    public Mono<Void> onError(ServerWebExchange exchange, HttpStatus status) {
-        ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(status);
-        return response.setComplete();
-    }
     public static class Config {}
 }
