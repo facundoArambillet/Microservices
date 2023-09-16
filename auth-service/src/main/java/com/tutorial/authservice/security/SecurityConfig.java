@@ -20,21 +20,21 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig implements WebMvcConfigurer {
 
-    @Bean
-    public InMemoryUserDetailsManager userDetailService() {
-
-        return new InMemoryUserDetailsManager(
-                User.withUsername("test@test.com")
-                        .password(passwordEncoder().encode("123456789"))
-                        .roles("ADMIN")
-                        .build(),
-
-                User.withUsername("test20@test.com")
-                        .password(passwordEncoder().encode("123456789"))
-                        .roles("BASIC")
-                        .build()
-        );
-    }
+//    @Bean
+//    public InMemoryUserDetailsManager userDetailService() {
+//
+//        return new InMemoryUserDetailsManager(
+//                User.withUsername("test@test.com")
+//                        .password(passwordEncoder().encode("123456789"))
+//                        .roles("ADMIN")
+//                        .build(),
+//
+//                User.withUsername("test20@test.com")
+//                        .password(passwordEncoder().encode("123456789"))
+//                        .roles("BASIC")
+//                        .build()
+//        );
+//    }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
