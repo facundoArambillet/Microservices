@@ -1,6 +1,5 @@
 package com.tutorial.authservice.model;
 
-import com.tutorial.authservice.enums.RoleEnum;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

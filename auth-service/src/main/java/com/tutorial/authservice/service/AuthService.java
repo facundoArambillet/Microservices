@@ -20,12 +20,12 @@ public class AuthService {
     AuthUserRepository authUserRepository;
     @Autowired
     JwtProvider jwtProvider;
-    public TokenDto login(AuthUserDto authUserDto) {
+    public TokenDto login(AuthUser authUser) {
         Authentication authentication =
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authUserDto.getUserName(),
-                        authUserDto.getUserPassword()));
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authUser.getUserName(),
+                        authUser.getUserPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = jwtProvider.createToken(authUserDto);
+        String token = jwtProvider.createToken(authUser);
         return new TokenDto(token);
     }
 }

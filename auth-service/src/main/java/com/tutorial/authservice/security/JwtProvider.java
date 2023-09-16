@@ -44,12 +44,12 @@ public class JwtProvider {
 //                .compact();
 //    }
 
-    public String createToken(AuthUserDto authUserDto){
+    public String createToken(AuthUser authUser){
         try {
             return JWT.create()
-                    .withSubject(authUserDto.getUserName())
-                    .withClaim("id", authUserDto.getIdUser())
-                    .withClaim("rol",authUserDto.getRol())
+                    .withSubject(authUser.getUserName())
+                    .withClaim("id", authUser.getIdUser())
+                    .withClaim("rol",authUser.getRol())
                     .withIssuedAt(new Date())
                     .withExpiresAt(Date.from(LocalDateTime.now()
                             .plusHours(24)
